@@ -1,7 +1,7 @@
-﻿{
+{
   "iisSettings": {
-    "windowsAuthentication": false, 
-    "anonymousAuthentication": true, 
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
     "iisExpress": {
       "applicationUrl": "http://localhost:30000",
       "sslPort": 44300
@@ -19,10 +19,22 @@
     "SetShapeDatabase": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:300001;http://localhost:30000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "applicationUrl": "http://localhost:30000"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
+      "environmentVariables": {
+        "ASPNETCORE_URLS": "https://+:443;http://+:80",
+        "ASPNETCORE_HTTPS_PORT": "44300"
+      },
+      "httpPort": 30000,
+      "useSSL": true,
+      "sslPort": 44300
     }
   }
 }
