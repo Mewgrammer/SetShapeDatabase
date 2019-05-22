@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SetShapeDatabase;
 
 namespace SetShapeDatabase.Migrations
 {
     [DbContext(typeof(SetShapeContext))]
-    partial class SetShapeContextModelSnapshot : ModelSnapshot
+    [Migration("20190522200910_refineRelations")]
+    partial class refineRelations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

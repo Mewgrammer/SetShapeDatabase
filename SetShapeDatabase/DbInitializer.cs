@@ -40,6 +40,34 @@ namespace SetShapeDatabase
             workouts = context.Workouts.ToList(); // Load Workouts from DB
             if (!context.Users.Any())
             {
+                var trainingDays = new List<TrainingDay>
+                {
+                    new TrainingDay {Name = "Admin Tag 1"},
+                    new TrainingDay {Name = "Admin Tag 2"}
+                };
+                var trainingDayWorkouts = new List<TrainingDayWorkout>
+                {
+                    new TrainingDayWorkout
+                    {
+                        TrainingDay = trainingDays[0],
+                        Workout = workouts[0]
+                    },
+                    new TrainingDayWorkout
+                    {
+                        TrainingDay = trainingDays[0],
+                        Workout = workouts[1]
+                    },
+                    new TrainingDayWorkout
+                    {
+                        TrainingDay = trainingDays[1],
+                        Workout = workouts[3]
+                    },
+                    new TrainingDayWorkout
+                    {
+                        TrainingDay = trainingDays[1],
+                        Workout = workouts[2]
+                    },
+                };
                 var adminUser = new User
                 {
                     Name = "Admin",
@@ -51,39 +79,13 @@ namespace SetShapeDatabase
                             Name = "AdminTraining",
                             Days = new List<TrainingDay>
                             {
-                                new TrainingDay
-                                {
-                                    Name = "AdminTag1",
-                                    Workouts = new List<Workout>
-                                    {
-                                        workouts[1],
-                                        workouts[3],
-                                    }
-                                },
-                                new TrainingDay
-                                {
-                                    Name = "AdminTag2",
-                                    Workouts = new List<Workout>
-                                    {
-                                        workouts[2],
-                                        workouts[1],
-                                    },
-                                    History =  new List<HistoryItem>()
-                                    {
-                                        new HistoryItem()
-                                        {
-                                            Repetitions = 5,
-                                            Sets = 2,
-                                            Weight = 999,
-                                            Workout = workouts[1]
-                                        }
-                                    }
-
-                                }
+                                trainingDays[0],
+                                trainingDays[1]
                             }
                         }
                     }
                 };
+                context.TrainingDayWorkouts.AddRange(trainingDayWorkouts);
                 context.Users.Add(adminUser);
                 context.SaveChanges();
 

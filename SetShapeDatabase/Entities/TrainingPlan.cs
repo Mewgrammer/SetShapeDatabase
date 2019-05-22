@@ -13,8 +13,7 @@ namespace SetShapeDatabase.Entities
 
         public string Name { get; set; }
 
-        public List<TrainingDay> Days { get; set; }
-
-
-    }
+        public List<TrainingDay> Days { get; set; } = new List<TrainingDay>();
+        
+}
 }

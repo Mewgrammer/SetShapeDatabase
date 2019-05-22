@@ -24,13 +24,20 @@ namespace SetShapeDatabase.Controller
 
         // GET: api/Users
         [HttpGet]
-        public IEnumerable<User> GetUsers()
+        [ProducesResponseType(typeof(List<User>), StatusCodes.Status200OK)]
+        public async Task<IEnumerable<User>> GetUsers()
         {
-            return _context.Users;
+            return await _context.Users
+                .Include(u => u.Trainings).ThenInclude(t => t.Days).ThenInclude(d => d.TrainingDayWorkouts)
+                .Include(u => u.Trainings).ThenInclude(t => t.Days).ThenInclude(d => d.History).ToListAsync();
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+
         public async Task<IActionResult> GetUser([FromRoute] int id)
         {
             if (!ModelState.IsValid)
@@ -38,7 +45,7 @@ namespace SetShapeDatabase.Controller
                 return BadRequest(ModelState);
             }
 
-            var user = await _context.Users.FindAsync(id);
+            var user = await GetUserAsync(id);
 
             if (user == null)
             {
@@ -51,6 +58,10 @@ namespace SetShapeDatabase.Controller
 
         // PUT: api/Users/5
         [HttpPut("{id}")]
+        [ProducesResponseType( StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+
         public async Task<IActionResult> PutUser([FromRoute] int id, [FromBody] User user)
         {
             if (!ModelState.IsValid)
@@ -85,6 +96,10 @@ namespace SetShapeDatabase.Controller
         }
 
         [HttpPost("/login")]
+        [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Login([FromBody] UserForm userForm)
         {
             if (!ModelState.IsValid)
@@ -96,17 +111,20 @@ namespace SetShapeDatabase.Controller
 
             if (user == null)
             {
-                return NotFound();
+                return NotFound(userForm.Name);
             }
             if(BCrypt.Net.BCrypt.Verify(userForm.Password, user.Password))
             {
-                return Ok(user);
+                return Ok(await GetUserAsync(user.Id));
             }
             return Unauthorized();
         }
 
         // POST: api/Users
         [HttpPost("/register")]
+        [ProducesResponseType(typeof(User), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Register([FromBody] UserForm userForm)
         {
             if (!ModelState.IsValid)
@@ -130,6 +148,9 @@ namespace SetShapeDatabase.Controller
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteUser([FromRoute] int id)
         {
             if (!ModelState.IsValid)
@@ -152,6 +173,15 @@ namespace SetShapeDatabase.Controller
         private bool UserExists(int id)
         {
             return _context.Users.Any(e => e.Id == id);
+        }
+
+        private async Task<User> GetUserAsync(int id)
+        {
+            return await _context.Users
+                .Include(u => u.Trainings).ThenInclude(t => t.Days).ThenInclude(d => d.TrainingDayWorkouts)
+                .Include(u => u.Trainings).ThenInclude(t => t.Days).ThenInclude(d => d.History)
+                .SingleOrDefaultAsync(u => u.Id == id);
+
         }
     }
 }

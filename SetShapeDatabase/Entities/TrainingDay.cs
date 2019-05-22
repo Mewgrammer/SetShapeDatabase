@@ -14,8 +14,8 @@ namespace SetShapeDatabase.Entities
 
         public string Name { get; set; }
 
-        public List<Workout> Workouts { get; set; }
+        public List<TrainingDayWorkout> TrainingDayWorkouts { get; set; } = new List<TrainingDayWorkout>();
 
-        public List<HistoryItem> History { get; set; }
+        public List<HistoryItem> History { get; set; } = new List<HistoryItem>();
     }
 }

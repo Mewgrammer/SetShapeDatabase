@@ -15,6 +15,8 @@ namespace SetShapeDatabase.Entities
 
         public string Password { get; set; }
 
-        public List<TrainingPlan> Trainings { get; set; }
+        public TrainingPlan CurrentTrainingPlan { get; set; }
+
+        public List<TrainingPlan> Trainings { get; set; } = new List<TrainingPlan>();
     }
 }

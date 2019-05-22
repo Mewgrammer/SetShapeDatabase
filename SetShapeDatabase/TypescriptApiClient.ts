@@ -55,7 +55,7 @@ export class HistoryItemsClient {
         return Promise.resolve<HistoryItem[] | null>(<any>null);
     }
 
-    postHistoryItem(historyItem: HistoryItem): Promise<FileResponse | null> {
+    postHistoryItem(historyItem: HistoryItem): Promise<HistoryItem | null> {
         let url_ = this.baseUrl + "/api/HistoryItems";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -66,7 +66,7 @@ export class HistoryItemsClient {
             method: "POST",
             headers: {
                 "Content-Type": "application/json", 
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -75,23 +75,29 @@ export class HistoryItemsClient {
         });
     }
 
-    protected processPostHistoryItem(response: Response): Promise<FileResponse | null> {
+    protected processPostHistoryItem(response: Response): Promise<HistoryItem | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = resultData201 ? HistoryItem.fromJS(resultData201) : <any>null;
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<HistoryItem | null>(<any>null);
     }
 
-    getHistoryItem(id: number): Promise<FileResponse | null> {
+    getHistoryItem(id: number): Promise<HistoryItem | null> {
         let url_ = this.baseUrl + "/api/HistoryItems/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -101,7 +107,7 @@ export class HistoryItemsClient {
         let options_ = <RequestInit>{
             method: "GET",
             headers: {
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -110,23 +116,33 @@ export class HistoryItemsClient {
         });
     }
 
-    protected processGetHistoryItem(response: Response): Promise<FileResponse | null> {
+    protected processGetHistoryItem(response: Response): Promise<HistoryItem | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 ? HistoryItem.fromJS(resultData200) : <any>null;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<HistoryItem | null>(<any>null);
     }
 
-    putHistoryItem(id: number, historyItem: HistoryItem): Promise<FileResponse | null> {
+    putHistoryItem(id: number, historyItem: HistoryItem): Promise<void> {
         let url_ = this.baseUrl + "/api/HistoryItems/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -140,7 +156,6 @@ export class HistoryItemsClient {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json", 
-                "Accept": "application/octet-stream"
             }
         };
 
@@ -149,23 +164,30 @@ export class HistoryItemsClient {
         });
     }
 
-    protected processPutHistoryItem(response: Response): Promise<FileResponse | null> {
+    protected processPutHistoryItem(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<void>(<any>null);
     }
 
-    deleteHistoryItem(id: number): Promise<FileResponse | null> {
+    deleteHistoryItem(id: number): Promise<HistoryItem | null> {
         let url_ = this.baseUrl + "/api/HistoryItems/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -175,7 +197,7 @@ export class HistoryItemsClient {
         let options_ = <RequestInit>{
             method: "DELETE",
             headers: {
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -184,20 +206,30 @@ export class HistoryItemsClient {
         });
     }
 
-    protected processDeleteHistoryItem(response: Response): Promise<FileResponse | null> {
+    protected processDeleteHistoryItem(response: Response): Promise<HistoryItem | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 ? HistoryItem.fromJS(resultData200) : <any>null;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<HistoryItem | null>(<any>null);
     }
 }
 
@@ -295,6 +327,51 @@ export class SetShapeClient {
             });
         }
         return Promise.resolve<User | null>(<any>null);
+    }
+
+    setActiveTrainingPlan(data: UserTrainingForm): Promise<TrainingDay | null> {
+        let url_ = this.baseUrl + "/training";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(data);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json", 
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSetActiveTrainingPlan(_response);
+        });
+    }
+
+    protected processSetActiveTrainingPlan(response: Response): Promise<TrainingDay | null> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 ? TrainingDay.fromJS(resultData200) : <any>null;
+            return result200;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = resultData404 ? TrainingPlan.fromJS(resultData404) : <any>null;
+            return throwException("A server error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TrainingDay | null>(<any>null);
     }
 
     removeTrainingFromUser(data: UserTrainingForm): Promise<User | null> {
@@ -444,7 +521,7 @@ export class SetShapeClient {
         return Promise.resolve<TrainingPlan | null>(<any>null);
     }
 
-    addWorkoutToDay(data: WorkoutDayForm): Promise<TrainingDay | null> {
+    addWorkoutToDay(data: TrainingDayWorkout): Promise<TrainingDayWorkout | null> {
         let url_ = this.baseUrl + "/workout";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -464,14 +541,14 @@ export class SetShapeClient {
         });
     }
 
-    protected processAddWorkoutToDay(response: Response): Promise<TrainingDay | null> {
+    protected processAddWorkoutToDay(response: Response): Promise<TrainingDayWorkout | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 ? TrainingDay.fromJS(resultData200) : <any>null;
+            result200 = resultData200 ? TrainingDayWorkout.fromJS(resultData200) : <any>null;
             return result200;
             });
         } else if (status === 400) {
@@ -490,10 +567,10 @@ export class SetShapeClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<TrainingDay | null>(<any>null);
+        return Promise.resolve<TrainingDayWorkout | null>(<any>null);
     }
 
-    removeWorkoutFromDay(data: WorkoutDayForm): Promise<TrainingDay | null> {
+    removeWorkoutFromDay(data: TrainingDayWorkout): Promise<TrainingDayWorkout | null> {
         let url_ = this.baseUrl + "/workout";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -513,28 +590,25 @@ export class SetShapeClient {
         });
     }
 
-    protected processRemoveWorkoutFromDay(response: Response): Promise<TrainingDay | null> {
+    protected processRemoveWorkoutFromDay(response: Response): Promise<TrainingDayWorkout | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 ? TrainingDay.fromJS(resultData200) : <any>null;
+            result200 = resultData200 ? TrainingDayWorkout.fromJS(resultData200) : <any>null;
             return result200;
             });
         } else if (status === 400) {
             return response.text().then((_responseText) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = resultData400 ? Workout.fromJS(resultData400) : <any>null;
-            return throwException("A server error occurred.", status, _responseText, _headers, result400);
+            return throwException("A server error occurred.", status, _responseText, _headers);
             });
         } else if (status === 404) {
             return response.text().then((_responseText) => {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = resultData404 !== undefined ? resultData404 : <any>null;
+            result404 = resultData404 ? Workout.fromJS(resultData404) : <any>null;
             return throwException("A server error occurred.", status, _responseText, _headers, result404);
             });
         } else if (status !== 200 && status !== 204) {
@@ -542,7 +616,7 @@ export class SetShapeClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<TrainingDay | null>(<any>null);
+        return Promise.resolve<TrainingDayWorkout | null>(<any>null);
     }
 
     addHistoryItemToDay(data: DayHistoryItemForm): Promise<TrainingDay | null> {
@@ -579,14 +653,14 @@ export class SetShapeClient {
             return response.text().then((_responseText) => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = resultData400 ? HistoryItem.fromJS(resultData400) : <any>null;
+            result400 = resultData400 ? TrainingDay.fromJS(resultData400) : <any>null;
             return throwException("A server error occurred.", status, _responseText, _headers, result400);
             });
         } else if (status === 404) {
             return response.text().then((_responseText) => {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = resultData404 !== undefined ? resultData404 : <any>null;
+            result404 = resultData404 ? HistoryItem.fromJS(resultData404) : <any>null;
             return throwException("A server error occurred.", status, _responseText, _headers, result404);
             });
         } else if (status !== 200 && status !== 204) {
@@ -631,14 +705,14 @@ export class SetShapeClient {
             return response.text().then((_responseText) => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = resultData400 ? HistoryItem.fromJS(resultData400) : <any>null;
+            result400 = resultData400 ? TrainingDay.fromJS(resultData400) : <any>null;
             return throwException("A server error occurred.", status, _responseText, _headers, result400);
             });
         } else if (status === 404) {
             return response.text().then((_responseText) => {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = resultData404 !== undefined ? resultData404 : <any>null;
+            result404 = resultData404 ? HistoryItem.fromJS(resultData404) : <any>null;
             return throwException("A server error occurred.", status, _responseText, _headers, result404);
             });
         } else if (status !== 200 && status !== 204) {
@@ -698,7 +772,7 @@ export class TrainingDaysClient {
         return Promise.resolve<TrainingDay[] | null>(<any>null);
     }
 
-    postTrainingDay(trainingDay: TrainingDay): Promise<FileResponse | null> {
+    postTrainingDay(trainingDay: TrainingDay): Promise<TrainingDay | null> {
         let url_ = this.baseUrl + "/api/TrainingDays";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -709,7 +783,7 @@ export class TrainingDaysClient {
             method: "POST",
             headers: {
                 "Content-Type": "application/json", 
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -718,23 +792,29 @@ export class TrainingDaysClient {
         });
     }
 
-    protected processPostTrainingDay(response: Response): Promise<FileResponse | null> {
+    protected processPostTrainingDay(response: Response): Promise<TrainingDay | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = resultData201 ? TrainingDay.fromJS(resultData201) : <any>null;
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<TrainingDay | null>(<any>null);
     }
 
-    getTrainingDay(id: number): Promise<FileResponse | null> {
+    getTrainingDay(id: number): Promise<TrainingDay | null> {
         let url_ = this.baseUrl + "/api/TrainingDays/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -744,7 +824,7 @@ export class TrainingDaysClient {
         let options_ = <RequestInit>{
             method: "GET",
             headers: {
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -753,23 +833,33 @@ export class TrainingDaysClient {
         });
     }
 
-    protected processGetTrainingDay(response: Response): Promise<FileResponse | null> {
+    protected processGetTrainingDay(response: Response): Promise<TrainingDay | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 ? TrainingDay.fromJS(resultData200) : <any>null;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<TrainingDay | null>(<any>null);
     }
 
-    putTrainingDay(id: number, trainingDay: TrainingDay): Promise<FileResponse | null> {
+    putTrainingDay(id: number, trainingDay: TrainingDay): Promise<void> {
         let url_ = this.baseUrl + "/api/TrainingDays/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -783,7 +873,6 @@ export class TrainingDaysClient {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json", 
-                "Accept": "application/octet-stream"
             }
         };
 
@@ -792,23 +881,30 @@ export class TrainingDaysClient {
         });
     }
 
-    protected processPutTrainingDay(response: Response): Promise<FileResponse | null> {
+    protected processPutTrainingDay(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<void>(<any>null);
     }
 
-    deleteTrainingDay(id: number): Promise<FileResponse | null> {
+    deleteTrainingDay(id: number): Promise<TrainingDay | null> {
         let url_ = this.baseUrl + "/api/TrainingDays/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -818,7 +914,7 @@ export class TrainingDaysClient {
         let options_ = <RequestInit>{
             method: "DELETE",
             headers: {
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -827,20 +923,30 @@ export class TrainingDaysClient {
         });
     }
 
-    protected processDeleteTrainingDay(response: Response): Promise<FileResponse | null> {
+    protected processDeleteTrainingDay(response: Response): Promise<TrainingDay | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 ? TrainingDay.fromJS(resultData200) : <any>null;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<TrainingDay | null>(<any>null);
     }
 }
 
@@ -892,7 +998,7 @@ export class TrainingPlansClient {
         return Promise.resolve<TrainingPlan[] | null>(<any>null);
     }
 
-    postTrainingPlan(trainingPlan: TrainingPlan): Promise<FileResponse | null> {
+    postTrainingPlan(trainingPlan: TrainingPlan): Promise<TrainingPlan | null> {
         let url_ = this.baseUrl + "/api/TrainingPlans";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -903,7 +1009,7 @@ export class TrainingPlansClient {
             method: "POST",
             headers: {
                 "Content-Type": "application/json", 
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -912,23 +1018,29 @@ export class TrainingPlansClient {
         });
     }
 
-    protected processPostTrainingPlan(response: Response): Promise<FileResponse | null> {
+    protected processPostTrainingPlan(response: Response): Promise<TrainingPlan | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = resultData201 ? TrainingPlan.fromJS(resultData201) : <any>null;
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<TrainingPlan | null>(<any>null);
     }
 
-    getTrainingPlan(id: number): Promise<FileResponse | null> {
+    getTrainingPlan(id: number): Promise<TrainingPlan | null> {
         let url_ = this.baseUrl + "/api/TrainingPlans/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -938,7 +1050,7 @@ export class TrainingPlansClient {
         let options_ = <RequestInit>{
             method: "GET",
             headers: {
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -947,23 +1059,33 @@ export class TrainingPlansClient {
         });
     }
 
-    protected processGetTrainingPlan(response: Response): Promise<FileResponse | null> {
+    protected processGetTrainingPlan(response: Response): Promise<TrainingPlan | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 ? TrainingPlan.fromJS(resultData200) : <any>null;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<TrainingPlan | null>(<any>null);
     }
 
-    putTrainingPlan(id: number, trainingPlan: TrainingPlan): Promise<FileResponse | null> {
+    putTrainingPlan(id: number, trainingPlan: TrainingPlan): Promise<void> {
         let url_ = this.baseUrl + "/api/TrainingPlans/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -977,7 +1099,6 @@ export class TrainingPlansClient {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json", 
-                "Accept": "application/octet-stream"
             }
         };
 
@@ -986,23 +1107,30 @@ export class TrainingPlansClient {
         });
     }
 
-    protected processPutTrainingPlan(response: Response): Promise<FileResponse | null> {
+    protected processPutTrainingPlan(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<void>(<any>null);
     }
 
-    deleteTrainingPlan(id: number): Promise<FileResponse | null> {
+    deleteTrainingPlan(id: number): Promise<TrainingPlan | null> {
         let url_ = this.baseUrl + "/api/TrainingPlans/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -1012,7 +1140,7 @@ export class TrainingPlansClient {
         let options_ = <RequestInit>{
             method: "DELETE",
             headers: {
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -1021,20 +1149,30 @@ export class TrainingPlansClient {
         });
     }
 
-    protected processDeleteTrainingPlan(response: Response): Promise<FileResponse | null> {
+    protected processDeleteTrainingPlan(response: Response): Promise<TrainingPlan | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 ? TrainingPlan.fromJS(resultData200) : <any>null;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<TrainingPlan | null>(<any>null);
     }
 }
 
@@ -1086,7 +1224,7 @@ export class UsersClient {
         return Promise.resolve<User[] | null>(<any>null);
     }
 
-    getUser(id: number): Promise<FileResponse | null> {
+    getUser(id: number): Promise<User | null> {
         let url_ = this.baseUrl + "/api/Users/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -1096,7 +1234,7 @@ export class UsersClient {
         let options_ = <RequestInit>{
             method: "GET",
             headers: {
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -1105,23 +1243,33 @@ export class UsersClient {
         });
     }
 
-    protected processGetUser(response: Response): Promise<FileResponse | null> {
+    protected processGetUser(response: Response): Promise<User | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 ? User.fromJS(resultData200) : <any>null;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<User | null>(<any>null);
     }
 
-    putUser(id: number, user: User): Promise<FileResponse | null> {
+    putUser(id: number, user: User): Promise<void> {
         let url_ = this.baseUrl + "/api/Users/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -1135,7 +1283,6 @@ export class UsersClient {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json", 
-                "Accept": "application/octet-stream"
             }
         };
 
@@ -1144,23 +1291,30 @@ export class UsersClient {
         });
     }
 
-    protected processPutUser(response: Response): Promise<FileResponse | null> {
+    protected processPutUser(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<void>(<any>null);
     }
 
-    deleteUser(id: number): Promise<FileResponse | null> {
+    deleteUser(id: number): Promise<User | null> {
         let url_ = this.baseUrl + "/api/Users/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -1170,7 +1324,7 @@ export class UsersClient {
         let options_ = <RequestInit>{
             method: "DELETE",
             headers: {
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -1179,23 +1333,33 @@ export class UsersClient {
         });
     }
 
-    protected processDeleteUser(response: Response): Promise<FileResponse | null> {
+    protected processDeleteUser(response: Response): Promise<User | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 ? User.fromJS(resultData200) : <any>null;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<User | null>(<any>null);
     }
 
-    login(userForm: UserForm): Promise<FileResponse | null> {
+    login(userForm: UserForm): Promise<User | null> {
         let url_ = this.baseUrl + "/login";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -1206,7 +1370,7 @@ export class UsersClient {
             method: "POST",
             headers: {
                 "Content-Type": "application/json", 
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -1215,23 +1379,40 @@ export class UsersClient {
         });
     }
 
-    protected processLogin(response: Response): Promise<FileResponse | null> {
+    protected processLogin(response: Response): Promise<User | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 ? User.fromJS(resultData200) : <any>null;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = resultData404 !== undefined ? resultData404 : <any>null;
+            return throwException("A server error occurred.", status, _responseText, _headers, result404);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<User | null>(<any>null);
     }
 
-    register(userForm: UserForm): Promise<FileResponse | null> {
+    register(userForm: UserForm): Promise<User | null> {
         let url_ = this.baseUrl + "/register";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -1242,7 +1423,7 @@ export class UsersClient {
             method: "POST",
             headers: {
                 "Content-Type": "application/json", 
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -1251,20 +1432,33 @@ export class UsersClient {
         });
     }
 
-    protected processRegister(response: Response): Promise<FileResponse | null> {
+    protected processRegister(response: Response): Promise<User | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = resultData201 ? User.fromJS(resultData201) : <any>null;
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 409) {
+            return response.text().then((_responseText) => {
+            let result409: any = null;
+            let resultData409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result409 = resultData409 !== undefined ? resultData409 : <any>null;
+            return throwException("A server error occurred.", status, _responseText, _headers, result409);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<User | null>(<any>null);
     }
 }
 
@@ -1316,7 +1510,7 @@ export class WorkoutsClient {
         return Promise.resolve<Workout[] | null>(<any>null);
     }
 
-    postWorkout(workout: Workout): Promise<FileResponse | null> {
+    postWorkout(workout: Workout): Promise<Workout | null> {
         let url_ = this.baseUrl + "/api/Workouts";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -1327,7 +1521,7 @@ export class WorkoutsClient {
             method: "POST",
             headers: {
                 "Content-Type": "application/json", 
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -1336,23 +1530,29 @@ export class WorkoutsClient {
         });
     }
 
-    protected processPostWorkout(response: Response): Promise<FileResponse | null> {
+    protected processPostWorkout(response: Response): Promise<Workout | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = resultData201 ? Workout.fromJS(resultData201) : <any>null;
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<Workout | null>(<any>null);
     }
 
-    getWorkout(id: number): Promise<FileResponse | null> {
+    getWorkout(id: number): Promise<Workout | null> {
         let url_ = this.baseUrl + "/api/Workouts/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -1362,7 +1562,7 @@ export class WorkoutsClient {
         let options_ = <RequestInit>{
             method: "GET",
             headers: {
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -1371,23 +1571,33 @@ export class WorkoutsClient {
         });
     }
 
-    protected processGetWorkout(response: Response): Promise<FileResponse | null> {
+    protected processGetWorkout(response: Response): Promise<Workout | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 ? Workout.fromJS(resultData200) : <any>null;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<Workout | null>(<any>null);
     }
 
-    putWorkout(id: number, workout: Workout): Promise<FileResponse | null> {
+    putWorkout(id: number, workout: Workout): Promise<void> {
         let url_ = this.baseUrl + "/api/Workouts/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -1401,7 +1611,6 @@ export class WorkoutsClient {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json", 
-                "Accept": "application/octet-stream"
             }
         };
 
@@ -1410,23 +1619,30 @@ export class WorkoutsClient {
         });
     }
 
-    protected processPutWorkout(response: Response): Promise<FileResponse | null> {
+    protected processPutWorkout(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 204) {
+            return response.text().then((_responseText) => {
+            return;
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<void>(<any>null);
     }
 
-    deleteWorkout(id: number): Promise<FileResponse | null> {
+    deleteWorkout(id: number): Promise<Workout | null> {
         let url_ = this.baseUrl + "/api/Workouts/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -1436,7 +1652,7 @@ export class WorkoutsClient {
         let options_ = <RequestInit>{
             method: "DELETE",
             headers: {
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -1445,25 +1661,36 @@ export class WorkoutsClient {
         });
     }
 
-    protected processDeleteWorkout(response: Response): Promise<FileResponse | null> {
+    protected processDeleteWorkout(response: Response): Promise<Workout | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 ? Workout.fromJS(resultData200) : <any>null;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            return throwException("A server error occurred.", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse | null>(<any>null);
+        return Promise.resolve<Workout | null>(<any>null);
     }
 }
 
 export class HistoryItem implements IHistoryItem {
     id!: number;
+    date!: Date;
     sets!: number;
     repetitions!: number;
     weight!: number;
@@ -1481,6 +1708,7 @@ export class HistoryItem implements IHistoryItem {
     init(data?: any) {
         if (data) {
             this.id = data["id"];
+            this.date = data["date"] ? new Date(data["date"].toString()) : <any>undefined;
             this.sets = data["sets"];
             this.repetitions = data["repetitions"];
             this.weight = data["weight"];
@@ -1498,6 +1726,7 @@ export class HistoryItem implements IHistoryItem {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
+        data["date"] = this.date ? this.date.toISOString() : <any>undefined;
         data["sets"] = this.sets;
         data["repetitions"] = this.repetitions;
         data["weight"] = this.weight;
@@ -1508,6 +1737,7 @@ export class HistoryItem implements IHistoryItem {
 
 export interface IHistoryItem {
     id: number;
+    date: Date;
     sets: number;
     repetitions: number;
     weight: number;
@@ -1517,6 +1747,7 @@ export interface IHistoryItem {
 export class Workout implements IWorkout {
     id!: number;
     name?: string | undefined;
+    trainingDayWorkouts?: TrainingDayWorkout[] | undefined;
 
     constructor(data?: IWorkout) {
         if (data) {
@@ -1531,6 +1762,11 @@ export class Workout implements IWorkout {
         if (data) {
             this.id = data["id"];
             this.name = data["name"];
+            if (data["trainingDayWorkouts"] && data["trainingDayWorkouts"].constructor === Array) {
+                this.trainingDayWorkouts = [] as any;
+                for (let item of data["trainingDayWorkouts"])
+                    this.trainingDayWorkouts!.push(TrainingDayWorkout.fromJS(item));
+            }
         }
     }
 
@@ -1545,6 +1781,11 @@ export class Workout implements IWorkout {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
         data["name"] = this.name;
+        if (this.trainingDayWorkouts && this.trainingDayWorkouts.constructor === Array) {
+            data["trainingDayWorkouts"] = [];
+            for (let item of this.trainingDayWorkouts)
+                data["trainingDayWorkouts"].push(item.toJSON());
+        }
         return data; 
     }
 }
@@ -1552,12 +1793,130 @@ export class Workout implements IWorkout {
 export interface IWorkout {
     id: number;
     name?: string | undefined;
+    trainingDayWorkouts?: TrainingDayWorkout[] | undefined;
+}
+
+export class TrainingDayWorkout implements ITrainingDayWorkout {
+    id!: number;
+    workoutId!: number;
+    workout?: Workout | undefined;
+    trainingDayId!: number;
+    trainingDay?: TrainingDay | undefined;
+
+    constructor(data?: ITrainingDayWorkout) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(data?: any) {
+        if (data) {
+            this.id = data["id"];
+            this.workoutId = data["workoutId"];
+            this.workout = data["workout"] ? Workout.fromJS(data["workout"]) : <any>undefined;
+            this.trainingDayId = data["trainingDayId"];
+            this.trainingDay = data["trainingDay"] ? TrainingDay.fromJS(data["trainingDay"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): TrainingDayWorkout {
+        data = typeof data === 'object' ? data : {};
+        let result = new TrainingDayWorkout();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["workoutId"] = this.workoutId;
+        data["workout"] = this.workout ? this.workout.toJSON() : <any>undefined;
+        data["trainingDayId"] = this.trainingDayId;
+        data["trainingDay"] = this.trainingDay ? this.trainingDay.toJSON() : <any>undefined;
+        return data; 
+    }
+}
+
+export interface ITrainingDayWorkout {
+    id: number;
+    workoutId: number;
+    workout?: Workout | undefined;
+    trainingDayId: number;
+    trainingDay?: TrainingDay | undefined;
+}
+
+export class TrainingDay implements ITrainingDay {
+    id!: number;
+    name?: string | undefined;
+    trainingDayWorkouts?: TrainingDayWorkout[] | undefined;
+    history?: HistoryItem[] | undefined;
+
+    constructor(data?: ITrainingDay) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(data?: any) {
+        if (data) {
+            this.id = data["id"];
+            this.name = data["name"];
+            if (data["trainingDayWorkouts"] && data["trainingDayWorkouts"].constructor === Array) {
+                this.trainingDayWorkouts = [] as any;
+                for (let item of data["trainingDayWorkouts"])
+                    this.trainingDayWorkouts!.push(TrainingDayWorkout.fromJS(item));
+            }
+            if (data["history"] && data["history"].constructor === Array) {
+                this.history = [] as any;
+                for (let item of data["history"])
+                    this.history!.push(HistoryItem.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): TrainingDay {
+        data = typeof data === 'object' ? data : {};
+        let result = new TrainingDay();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        if (this.trainingDayWorkouts && this.trainingDayWorkouts.constructor === Array) {
+            data["trainingDayWorkouts"] = [];
+            for (let item of this.trainingDayWorkouts)
+                data["trainingDayWorkouts"].push(item.toJSON());
+        }
+        if (this.history && this.history.constructor === Array) {
+            data["history"] = [];
+            for (let item of this.history)
+                data["history"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface ITrainingDay {
+    id: number;
+    name?: string | undefined;
+    trainingDayWorkouts?: TrainingDayWorkout[] | undefined;
+    history?: HistoryItem[] | undefined;
 }
 
 export class User implements IUser {
     id!: number;
     name?: string | undefined;
     password?: string | undefined;
+    currentTrainingPlan?: TrainingPlan | undefined;
     trainings?: TrainingPlan[] | undefined;
 
     constructor(data?: IUser) {
@@ -1574,6 +1933,7 @@ export class User implements IUser {
             this.id = data["id"];
             this.name = data["name"];
             this.password = data["password"];
+            this.currentTrainingPlan = data["currentTrainingPlan"] ? TrainingPlan.fromJS(data["currentTrainingPlan"]) : <any>undefined;
             if (data["trainings"] && data["trainings"].constructor === Array) {
                 this.trainings = [] as any;
                 for (let item of data["trainings"])
@@ -1594,6 +1954,7 @@ export class User implements IUser {
         data["id"] = this.id;
         data["name"] = this.name;
         data["password"] = this.password;
+        data["currentTrainingPlan"] = this.currentTrainingPlan ? this.currentTrainingPlan.toJSON() : <any>undefined;
         if (this.trainings && this.trainings.constructor === Array) {
             data["trainings"] = [];
             for (let item of this.trainings)
@@ -1607,6 +1968,7 @@ export interface IUser {
     id: number;
     name?: string | undefined;
     password?: string | undefined;
+    currentTrainingPlan?: TrainingPlan | undefined;
     trainings?: TrainingPlan[] | undefined;
 }
 
@@ -1660,70 +2022,6 @@ export interface ITrainingPlan {
     id: number;
     name?: string | undefined;
     days?: TrainingDay[] | undefined;
-}
-
-export class TrainingDay implements ITrainingDay {
-    id!: number;
-    name?: string | undefined;
-    workouts?: Workout[] | undefined;
-    history?: HistoryItem[] | undefined;
-
-    constructor(data?: ITrainingDay) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(data?: any) {
-        if (data) {
-            this.id = data["id"];
-            this.name = data["name"];
-            if (data["workouts"] && data["workouts"].constructor === Array) {
-                this.workouts = [] as any;
-                for (let item of data["workouts"])
-                    this.workouts!.push(Workout.fromJS(item));
-            }
-            if (data["history"] && data["history"].constructor === Array) {
-                this.history = [] as any;
-                for (let item of data["history"])
-                    this.history!.push(HistoryItem.fromJS(item));
-            }
-        }
-    }
-
-    static fromJS(data: any): TrainingDay {
-        data = typeof data === 'object' ? data : {};
-        let result = new TrainingDay();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        data["name"] = this.name;
-        if (this.workouts && this.workouts.constructor === Array) {
-            data["workouts"] = [];
-            for (let item of this.workouts)
-                data["workouts"].push(item.toJSON());
-        }
-        if (this.history && this.history.constructor === Array) {
-            data["history"] = [];
-            for (let item of this.history)
-                data["history"].push(item.toJSON());
-        }
-        return data; 
-    }
-}
-
-export interface ITrainingDay {
-    id: number;
-    name?: string | undefined;
-    workouts?: Workout[] | undefined;
-    history?: HistoryItem[] | undefined;
 }
 
 export class UserTrainingForm implements IUserTrainingForm {
@@ -1812,49 +2110,6 @@ export interface ITrainingPlanDayForm {
     day: TrainingDay;
 }
 
-export class WorkoutDayForm implements IWorkoutDayForm {
-    dayId!: number;
-    workout!: Workout;
-
-    constructor(data?: IWorkoutDayForm) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-        if (!data) {
-            this.workout = new Workout();
-        }
-    }
-
-    init(data?: any) {
-        if (data) {
-            this.dayId = data["dayId"];
-            this.workout = data["workout"] ? Workout.fromJS(data["workout"]) : new Workout();
-        }
-    }
-
-    static fromJS(data: any): WorkoutDayForm {
-        data = typeof data === 'object' ? data : {};
-        let result = new WorkoutDayForm();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["dayId"] = this.dayId;
-        data["workout"] = this.workout ? this.workout.toJSON() : <any>undefined;
-        return data; 
-    }
-}
-
-export interface IWorkoutDayForm {
-    dayId: number;
-    workout: Workout;
-}
-
 export class DayHistoryItemForm implements IDayHistoryItemForm {
     dayId!: number;
     item!: HistoryItem;
@@ -1936,13 +2191,6 @@ export class UserForm implements IUserForm {
 export interface IUserForm {
     name: string;
     password: string;
-}
-
-export interface FileResponse {
-    data: Blob;
-    status: number;
-    fileName?: string;
-    headers?: { [name: string]: any };
 }
 
 export class SwaggerException extends Error {

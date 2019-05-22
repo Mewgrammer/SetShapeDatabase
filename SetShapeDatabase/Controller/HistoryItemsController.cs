@@ -23,6 +23,7 @@ namespace SetShapeDatabase.Controller
 
         // GET: api/HistoryItems
         [HttpGet]
+        [ProducesResponseType(typeof(List<HistoryItem>), StatusCodes.Status200OK)]
         public IEnumerable<HistoryItem> GetHistoryItems()
         {
             return _context.HistoryItems;
@@ -30,6 +31,9 @@ namespace SetShapeDatabase.Controller
 
         // GET: api/HistoryItems/5
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(HistoryItem), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetHistoryItem([FromRoute] int id)
         {
             if (!ModelState.IsValid)
@@ -49,6 +53,10 @@ namespace SetShapeDatabase.Controller
 
         // PUT: api/HistoryItems/5
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+
         public async Task<IActionResult> PutHistoryItem([FromRoute] int id, [FromBody] HistoryItem historyItem)
         {
             if (!ModelState.IsValid)
@@ -84,6 +92,8 @@ namespace SetShapeDatabase.Controller
 
         // POST: api/HistoryItems
         [HttpPost]
+        [ProducesResponseType(typeof(HistoryItem), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PostHistoryItem([FromBody] HistoryItem historyItem)
         {
             if (!ModelState.IsValid)
@@ -99,6 +109,9 @@ namespace SetShapeDatabase.Controller
 
         // DELETE: api/HistoryItems/5
         [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(HistoryItem), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteHistoryItem([FromRoute] int id)
         {
             if (!ModelState.IsValid)

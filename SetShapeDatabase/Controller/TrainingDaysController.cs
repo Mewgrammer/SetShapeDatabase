@@ -30,6 +30,9 @@ namespace SetShapeDatabase.Controller
 
         // GET: api/TrainingDays/5
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(TrainingDay), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetTrainingDay([FromRoute] int id)
         {
             if (!ModelState.IsValid)
@@ -49,6 +52,10 @@ namespace SetShapeDatabase.Controller
 
         // PUT: api/TrainingDays/5
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+
         public async Task<IActionResult> PutTrainingDay([FromRoute] int id, [FromBody] TrainingDay trainingDay)
         {
             if (!ModelState.IsValid)
@@ -84,6 +91,8 @@ namespace SetShapeDatabase.Controller
 
         // POST: api/TrainingDays
         [HttpPost]
+        [ProducesResponseType(typeof(TrainingDay), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PostTrainingDay([FromBody] TrainingDay trainingDay)
         {
             if (!ModelState.IsValid)
@@ -99,6 +108,9 @@ namespace SetShapeDatabase.Controller
 
         // DELETE: api/TrainingDays/5
         [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(TrainingDay), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteTrainingDay([FromRoute] int id)
         {
             if (!ModelState.IsValid)
