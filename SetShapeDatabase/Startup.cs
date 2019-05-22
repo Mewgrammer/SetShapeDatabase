@@ -78,12 +78,11 @@ namespace SetShapeDatabase
         {
             try
             {
-                var document = await SwaggerDocument.FromUrlAsync("http://localhost:5000/swagger/v1/swagger.json");
+                var document = await SwaggerDocument.FromUrlAsync("http://localhost:30000/swagger/v1/swagger.json");
                 var settings = new SwaggerToTypeScriptClientGeneratorSettings
                 {
                     ClassName = "{controller}Client",
                     GenerateClientClasses = true,
-                    GenerateClientInterfaces = true,
                     GenerateOptionalParameters = true,
                     GenerateResponseClasses = true,
                 };

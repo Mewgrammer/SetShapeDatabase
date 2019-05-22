@@ -1,14 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace SetShapeDatabase.Controller.Forms
 {
-    public class LoginForm
+    public class UserForm
     {
-        public string Name { get; set; }
+        [Required]
+        public string Name
+        {
+            get; set;
+        }
 
+        [Required]
         public string Password { get; set; }
     }
 }

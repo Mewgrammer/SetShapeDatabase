@@ -24,7 +24,7 @@ namespace SetShapeDatabase
                  .AddJsonFile("appsettings.json", optional: true)
                  .Build();
 
-            var host = BuildWebHost(args).Migrate();
+            var host = BuildWebHost(args).MigrateAndInitialize();
             host.Run();
         }
 
@@ -50,13 +50,14 @@ namespace SetShapeDatabase
 
     public static class WebHostExtensions
     {
-        public static IWebHost Migrate(this IWebHost webhost)
+        public static IWebHost MigrateAndInitialize(this IWebHost webhost)
         {
             using (var scope = webhost.Services.GetService<IServiceScopeFactory>().CreateScope())
             {
                 using (var dbContext = scope.ServiceProvider.GetRequiredService<SetShapeContext>())
                 {
                     dbContext.Database.Migrate();
+                    DbInitializer.Initialize(dbContext);
                 }
             }
             return webhost;

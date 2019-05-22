@@ -85,33 +85,44 @@ namespace SetShapeDatabase.Controller
         }
 
         [HttpPost("/login")]
-        public async Task<IActionResult> Login([FromBody] LoginForm loginForm)
+        public async Task<IActionResult> Login([FromBody] UserForm userForm)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Name == loginForm.Name && u.Password == loginForm.Password);
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Name == userForm.Name);
 
             if (user == null)
             {
                 return NotFound();
             }
-
-            return Ok(user);
+            if(BCrypt.Net.BCrypt.Verify(userForm.Password, user.Password))
+            {
+                return Ok(user);
+            }
+            return Unauthorized();
         }
 
         // POST: api/Users
         [HttpPost("/register")]
-        public async Task<IActionResult> Register([FromBody] User user)
+        public async Task<IActionResult> Register([FromBody] UserForm userForm)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Users.Add(user);
+            var existingUser = await _context.Users.SingleOrDefaultAsync(u => u.Name == userForm.Name);
+            if(existingUser != null)
+            {
+                return Conflict($"User with Name '{userForm.Name}' already exists");
+            }
+
+
+            var user = new User { Name = userForm.Name, Password = BCrypt.Net.BCrypt.HashPassword(userForm.Password), Trainings = new List<TrainingPlan>() };
+            await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
