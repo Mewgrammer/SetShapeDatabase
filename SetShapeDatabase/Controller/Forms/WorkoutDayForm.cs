@@ -13,6 +13,6 @@ namespace SetShapeDatabase.Controller.Forms
         public int DayId { get; set; }
 
         [Required]
-        public Workout Workout { get; set; }
+        public int WorkoutId { get; set; }
     }
 }

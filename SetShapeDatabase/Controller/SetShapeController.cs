@@ -183,7 +183,13 @@ namespace SetShapeDatabase.Controller
                     {
                         return NotFound(data.Day);
                     }
-                    var result = await _context.TrainingDays.AddAsync(data.Day);
+                    var workoutDays = new List<TrainingDayWorkout>();
+                    foreach (var workout in _context.Workouts.Where(w => data.Day.Workouts.Any(x => x.Id == w.Id)))
+                    {
+                        workoutDays.Add(new TrainingDayWorkout { TrainingDay = data.Day, TrainingDayId = data.Day.Id, Workout = workout, WorkoutId = workout.Id });
+                    }
+                    data.Day.TrainingDayWorkouts = workoutDays;
+                    var result = _context.TrainingDays.Add(data.Day);
                     trainingDay = result.Entity;
                 }
                 trainingPlan.Days.Add(trainingDay);
@@ -246,7 +252,9 @@ namespace SetShapeDatabase.Controller
                 }
 
                 var day = await _context.TrainingDays.SingleOrDefaultAsync(d => d.Id == data.DayId);
-                day.Workouts.Add(data.Workout);
+                var workout = await _context.Workouts.SingleOrDefaultAsync(w => w.Id == data.WorkoutId);
+                var workoutDay = new TrainingDayWorkout { TrainingDay = day, TrainingDayId = day.Id, Workout = workout, WorkoutId = workout.Id};
+                day.TrainingDayWorkouts.Add(workoutDay);
                 await _context.SaveChangesAsync();
                 return Ok(data);
             }
@@ -271,8 +279,9 @@ namespace SetShapeDatabase.Controller
                     return BadRequest();
                 }
 
-                var day = await _context.TrainingDays.SingleOrDefaultAsync(d => d.Id == data.DayId);
-                day.Workouts.Remove(data.Workout);
+                var day = await _context.TrainingDays.Include(d => d.TrainingDayWorkouts).SingleOrDefaultAsync(d => d.Id == data.DayId);
+                var dayWorkout = day.TrainingDayWorkouts.FirstOrDefault(w => w.WorkoutId == data.WorkoutId);
+                day.TrainingDayWorkouts.Remove(dayWorkout);
                 await _context.SaveChangesAsync();
 
                 return Ok(data);
@@ -310,6 +319,7 @@ namespace SetShapeDatabase.Controller
                     {
                         return NotFound(data.Item);
                     }
+                    data.Item.Workout = await _context.Workouts.SingleOrDefaultAsync(w => w.Id == data.Item.Workout.Id);
                     var result = await _context.HistoryItems.AddAsync(data.Item);
                     item = result.Entity;
                 }
