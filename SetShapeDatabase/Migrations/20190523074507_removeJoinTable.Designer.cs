@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SetShapeDatabase;
 
 namespace SetShapeDatabase.Migrations
 {
     [DbContext(typeof(SetShapeContext))]
-    partial class SetShapeContextModelSnapshot : ModelSnapshot
+    [Migration("20190523074507_removeJoinTable")]
+    partial class removeJoinTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,19 +65,6 @@ namespace SetShapeDatabase.Migrations
                     b.ToTable("TrainingDays");
                 });
 
-            modelBuilder.Entity("SetShapeDatabase.Entities.TrainingDayWorkout", b =>
-                {
-                    b.Property<int>("TrainingDayId");
-
-                    b.Property<int>("WorkoutId");
-
-                    b.HasKey("TrainingDayId", "WorkoutId");
-
-                    b.HasIndex("WorkoutId");
-
-                    b.ToTable("TrainingDayWorkouts");
-                });
-
             modelBuilder.Entity("SetShapeDatabase.Entities.TrainingPlan", b =>
                 {
                     b.Property<int>("Id")
@@ -120,7 +109,11 @@ namespace SetShapeDatabase.Migrations
 
                     b.Property<string>("Name");
 
+                    b.Property<int?>("TrainingDayId");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("TrainingDayId");
 
                     b.ToTable("Workouts");
                 });
@@ -143,19 +136,6 @@ namespace SetShapeDatabase.Migrations
                         .HasForeignKey("TrainingPlanId");
                 });
 
-            modelBuilder.Entity("SetShapeDatabase.Entities.TrainingDayWorkout", b =>
-                {
-                    b.HasOne("SetShapeDatabase.Entities.TrainingDay", "TrainingDay")
-                        .WithMany("TrainingDayWorkouts")
-                        .HasForeignKey("TrainingDayId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("SetShapeDatabase.Entities.Workout", "Workout")
-                        .WithMany("TrainingDayWorkouts")
-                        .HasForeignKey("WorkoutId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("SetShapeDatabase.Entities.TrainingPlan", b =>
                 {
                     b.HasOne("SetShapeDatabase.Entities.User")
@@ -168,6 +148,13 @@ namespace SetShapeDatabase.Migrations
                     b.HasOne("SetShapeDatabase.Entities.TrainingPlan", "CurrentTrainingPlan")
                         .WithMany()
                         .HasForeignKey("CurrentTrainingPlanId");
+                });
+
+            modelBuilder.Entity("SetShapeDatabase.Entities.Workout", b =>
+                {
+                    b.HasOne("SetShapeDatabase.Entities.TrainingDay")
+                        .WithMany("Workouts")
+                        .HasForeignKey("TrainingDayId");
                 });
 #pragma warning restore 612, 618
         }

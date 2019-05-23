@@ -27,9 +27,12 @@ namespace SetShapeDatabase.Controller
         [ProducesResponseType(typeof(List<User>), StatusCodes.Status200OK)]
         public async Task<IEnumerable<User>> GetUsers()
         {
-            return await _context.Users
-                .Include(u => u.Trainings).ThenInclude(t => t.Days).ThenInclude(d => d.TrainingDayWorkouts)
-                .Include(u => u.Trainings).ThenInclude(t => t.Days).ThenInclude(d => d.History).ToListAsync();
+            var users = new List<User>();
+            foreach (var user in _context.Users)
+            {
+                users.Add(await GetUserAsync(user.Id));
+            }
+            return users;
         }
 
         // GET: api/Users/5
@@ -177,11 +180,12 @@ namespace SetShapeDatabase.Controller
 
         private async Task<User> GetUserAsync(int id)
         {
-            return await _context.Users
+            var user = await _context.Users
                 .Include(u => u.Trainings).ThenInclude(t => t.Days).ThenInclude(d => d.TrainingDayWorkouts)
                 .Include(u => u.Trainings).ThenInclude(t => t.Days).ThenInclude(d => d.History)
                 .SingleOrDefaultAsync(u => u.Id == id);
-
+            user.PrepareSerialize(_context.Workouts.ToList());
+            return user;
         }
     }
 }

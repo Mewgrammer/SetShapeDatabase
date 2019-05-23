@@ -62,20 +62,20 @@ namespace SetShapeDatabase.Controller
                         return NotFound(data.TrainingPlan);
                     }
                 }
-                //user.Trainings.Add(new TrainingPlan
-                //{
-                //    Name = data.TrainingPlan.Name,
-                //    Days = data.TrainingPlan.Days.Select(
-                //        d => new TrainingDay
-                //        {
-                //            Name = d.Name,
-                //            TrainingDayWorkouts = d.TrainingDayWorkouts.Select(w =>
-                //                _context.Workouts.FirstOrDefault(x => x.Id == w.Id)).ToList()
-                //        }).ToList()
-                //});
                 user.Trainings.Add(data.TrainingPlan);
-                _context.Users.Update(user);
                 await _context.SaveChangesAsync();
+                var addedTraining = user.Trainings.LastOrDefault();
+                var workoutDays = new List<TrainingDayWorkout>();
+                foreach (var day in addedTraining?.Days)
+                {
+                    foreach (var workout in _context.Workouts.Where(w => day.Workouts.Any(x => x.Id == w.Id)))
+                    {
+                        workoutDays.Add(new TrainingDayWorkout { TrainingDay = day, TrainingDayId = day.Id, Workout = workout, WorkoutId = workout.Id});
+                    }
+                }
+                _context.TrainingDayWorkouts.AddRange(workoutDays);
+                await _context.SaveChangesAsync();
+                user.PrepareSerialize(_context.Workouts.ToList());
                 return Ok(user);
             }
             catch (Exception e)
@@ -236,7 +236,7 @@ namespace SetShapeDatabase.Controller
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(int), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(Workout), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> AddWorkoutToDay([FromBody] TrainingDayWorkout data) 
+        public async Task<IActionResult> AddWorkoutToDay([FromBody] WorkoutDayForm data) 
         {
             try
             {
@@ -244,9 +244,10 @@ namespace SetShapeDatabase.Controller
                 {
                     return BadRequest();
                 }
-                _context.TrainingDayWorkouts.Add(data);
-                await _context.SaveChangesAsync();
 
+                var day = await _context.TrainingDays.SingleOrDefaultAsync(d => d.Id == data.DayId);
+                day.Workouts.Add(data.Workout);
+                await _context.SaveChangesAsync();
                 return Ok(data);
             }
             catch (Exception e)
@@ -261,7 +262,7 @@ namespace SetShapeDatabase.Controller
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(int), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(Workout), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> RemoveWorkoutFromDay([FromBody] TrainingDayWorkout data)
+        public async Task<IActionResult> RemoveWorkoutFromDay([FromBody] WorkoutDayForm data)
         {
             try
             {
@@ -270,7 +271,8 @@ namespace SetShapeDatabase.Controller
                     return BadRequest();
                 }
 
-                _context.TrainingDayWorkouts.Remove(data);
+                var day = await _context.TrainingDays.SingleOrDefaultAsync(d => d.Id == data.DayId);
+                day.Workouts.Remove(data.Workout);
                 await _context.SaveChangesAsync();
 
                 return Ok(data);
@@ -358,10 +360,12 @@ namespace SetShapeDatabase.Controller
         
         private async Task<User> GetUserAsync(int id)
         {
-            return await _context.Users
+            var user = await _context.Users
                 .Include(u => u.Trainings).ThenInclude(t => t.Days).ThenInclude(d => d.TrainingDayWorkouts)
                 .Include(u => u.Trainings).ThenInclude(t => t.Days).ThenInclude(d => d.History)
                 .SingleOrDefaultAsync(u => u.Id == id);
+            user.PrepareSerialize(_context.Workouts.ToList());
+            return user;
 
         }
     }

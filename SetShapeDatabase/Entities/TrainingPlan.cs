@@ -14,6 +14,14 @@ namespace SetShapeDatabase.Entities
         public string Name { get; set; }
 
         public List<TrainingDay> Days { get; set; } = new List<TrainingDay>();
-        
-}
+
+        public void PrepareSerialize(ICollection<Workout> workouts)
+        {
+            foreach (var day in Days)
+            {
+                day.PrepareSerialize(workouts);
+            }
+        }
+
+    }
 }

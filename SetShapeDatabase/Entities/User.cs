@@ -18,5 +18,14 @@ namespace SetShapeDatabase.Entities
         public TrainingPlan CurrentTrainingPlan { get; set; }
 
         public List<TrainingPlan> Trainings { get; set; } = new List<TrainingPlan>();
+
+        public void PrepareSerialize(ICollection<Workout> workouts)
+        {
+            CurrentTrainingPlan?.PrepareSerialize(workouts);
+            foreach (var training in Trainings)
+            {
+                training.PrepareSerialize(workouts);
+            }
+        }
     }
 }

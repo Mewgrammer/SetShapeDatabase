@@ -42,16 +42,18 @@ namespace SetShapeDatabase
                 .HasMany(u => u.Trainings);
             builder.Entity<TrainingPlan>()
                 .HasMany(t => t.Days);
-            builder.Entity<TrainingDayWorkout>()
-                .HasOne(tdw => tdw.TrainingDay)
-                .WithMany(td => td.TrainingDayWorkouts)
-                .HasForeignKey(x => x.TrainingDayId);
-            builder.Entity<TrainingDayWorkout>()
-                .HasOne(tdw => tdw.Workout)
-                .WithMany(w => w.TrainingDayWorkouts)
-                .HasForeignKey(x => x.WorkoutId);
             builder.Entity<TrainingDay>()
                 .HasMany(t => t.History);
+            builder.Entity<TrainingDayWorkout>()
+                .HasKey(x => new {x.TrainingDayId, x.WorkoutId});
+            builder.Entity<TrainingDayWorkout>()
+                .HasOne( tdw => tdw.TrainingDay)
+                .WithMany(d => d.TrainingDayWorkouts)
+                .HasForeignKey(tdw => tdw.TrainingDayId);
+            builder.Entity<TrainingDayWorkout>()
+                .HasOne(tdw => tdw.Workout)
+                .WithMany(d => d.TrainingDayWorkouts)
+                .HasForeignKey(tdw => tdw.WorkoutId);
             builder.Entity<HistoryItem>()
                 .HasOne(o => o.Workout);
         }

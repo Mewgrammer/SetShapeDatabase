@@ -40,10 +40,29 @@ namespace SetShapeDatabase
             workouts = context.Workouts.ToList(); // Load Workouts from DB
             if (!context.Users.Any())
             {
+                var historyItems = new List<HistoryItem>
+                {
+                    new HistoryItem
+                    {
+                        Date = DateTime.Now,
+                        Repetitions = 5,
+                        Sets = 3,
+                        Weight = 100,
+                        Workout = workouts[0]
+                    },
+                    new HistoryItem
+                    {
+                        Date = DateTime.Now,
+                        Repetitions = 5,
+                        Sets = 3,
+                        Weight = 100,
+                        Workout = workouts[1]
+                    },
+                };
                 var trainingDays = new List<TrainingDay>
                 {
-                    new TrainingDay {Name = "Admin Tag 1"},
-                    new TrainingDay {Name = "Admin Tag 2"}
+                    new TrainingDay {Name = "Admin Tag 1", History = {historyItems[1]}},
+                    new TrainingDay {Name = "Admin Tag 2", History = {historyItems[0]}}
                 };
                 var trainingDayWorkouts = new List<TrainingDayWorkout>
                 {
@@ -68,10 +87,11 @@ namespace SetShapeDatabase
                         Workout = workouts[2]
                     },
                 };
+
                 var adminUser = new User
                 {
                     Name = "Admin",
-                    Password = BCrypt.Net.BCrypt.HashPassword("StrengGeheim"),
+                    Password = BCrypt.Net.BCrypt.HashPassword("1"),
                     Trainings = new List<TrainingPlan>
                     {
                         new TrainingPlan
