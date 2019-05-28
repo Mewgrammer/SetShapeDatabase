@@ -13,14 +13,14 @@ namespace SetShapeDatabase
     {
         public SetShapeContext CreateDbContext(string[] args)
         {
-            IConfigurationRoot configuration = new ConfigurationBuilder()
+            var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
                 .Build();
 
             var builder = new DbContextOptionsBuilder<SetShapeContext>();
 
-            var connectionString = configuration.GetConnectionString("SetShapeContext");
+            var connectionString = configuration.GetConnectionString("SetShapeContext") ?? "Server=db;Database=SetShape;User=sa;Password=secret_password2019;Trusted_Connection=True;";
 
             builder.UseSqlServer(connectionString);
 

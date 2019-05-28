@@ -25,6 +25,15 @@
       },
       "applicationUrl": "http://localhost:30000"
     },
+    "SetShapeDatabase-CloudDb": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:30000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      },
+      "applicationUrl": "http://localhost:30000"
+    },
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,

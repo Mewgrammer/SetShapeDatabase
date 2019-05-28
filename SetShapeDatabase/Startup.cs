@@ -28,7 +28,6 @@ namespace SetShapeDatabase
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile($"{configName}.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"{configName}.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
@@ -40,9 +39,7 @@ namespace SetShapeDatabase
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-
             var connectionString = Configuration.GetConnectionString("SetShapeContext") ?? "Server=.\\SQLEXPRESS;Database=SetShape;Trusted_Connection=True;";
-            Console.WriteLine("CONNECTION STRING: " +connectionString);
             services.AddDbContext<SetShapeContext>(options =>
                 options.UseSqlServer(connectionString));
 

@@ -57,6 +57,7 @@ namespace SetShapeDatabase
             {
                 using (var dbContext = scope.ServiceProvider.GetRequiredService<SetShapeContext>())
                 {
+                    Console.WriteLine("Migrating DB...");
                     dbContext.Database.Migrate();
                     DbInitializer.Initialize(dbContext);
                 }
