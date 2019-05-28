@@ -19,6 +19,7 @@
     "SetShapeDatabase": {
       "commandName": "Project",
       "launchBrowser": true,
+      "launchUrl": "http://localhost:30000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
