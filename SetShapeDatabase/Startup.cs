@@ -31,7 +31,6 @@ namespace SetShapeDatabase
                 .AddJsonFile($"{configName}.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"{configName}.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
-
             Configuration = builder.Build();
         }
 
@@ -43,11 +42,11 @@ namespace SetShapeDatabase
         {
 
             var connectionString = Configuration.GetConnectionString("SetShapeContext") ?? "Server=.\\SQLEXPRESS;Database=SetShape;Trusted_Connection=True;";
+            Console.WriteLine("CONNECTION STRING: " +connectionString);
             services.AddDbContext<SetShapeContext>(options =>
                 options.UseSqlServer(connectionString));
 
             services.AddSwaggerDocument();
-
             services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
         }
 
@@ -58,6 +57,12 @@ namespace SetShapeDatabase
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
 
             app.UseCors(options =>
             {
@@ -66,10 +71,18 @@ namespace SetShapeDatabase
                 options.AllowAnyOrigin();
             });
 
-
             app.UseSwagger();
             app.UseSwaggerUi3();
-            app.UseMvc();
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+            app.UseCookiePolicy();
+
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
+            });
             GenerateTypescriptApiClient();
 
         }

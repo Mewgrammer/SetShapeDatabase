@@ -22,6 +22,7 @@ namespace SetShapeDatabase
                  .AddCommandLine(args)
                  .SetBasePath(Directory.GetCurrentDirectory())
                  .AddJsonFile("appsettings.json", optional: true)
+                 .AddEnvironmentVariables()
                  .Build();
 
             var host = BuildWebHost(args).MigrateAndInitialize();
