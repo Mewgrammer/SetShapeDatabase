@@ -28,6 +28,7 @@ namespace SetShapeDatabase
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
+                .AddJsonFile($"appsettings.json", optional: false)
                 .AddJsonFile($"{configName}.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
