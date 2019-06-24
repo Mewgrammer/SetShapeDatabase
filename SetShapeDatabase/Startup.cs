@@ -70,6 +70,11 @@ namespace SetShapeDatabase
 
             app.UseSwagger();
             app.UseSwaggerUi3();
+            app.UseReDoc(c =>
+            {
+                c.Path = "/redoc";
+                c.DocumentPath = "/swagger/v1/swagger.json";
+            });
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
