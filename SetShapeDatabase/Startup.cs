@@ -43,7 +43,9 @@ namespace SetShapeDatabase
             services.AddDbContext<SetShapeContext>(options =>
                 options.UseSqlServer(connectionString));
 
-            services.AddSwaggerDocument();
+            services.AddSwaggerDocument(cfg => {
+                cfg.Title = "Set Shape API";
+            });
             services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
         }
 
