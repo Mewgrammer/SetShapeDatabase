@@ -1,3 +1,3 @@
 # Database with Web-Api for [SetShape](https://github.com/Mewgrammer/SetShape)
 
-[![Build status](https://michaelmew.visualstudio.com/SetShape/_apis/build/status/SetShape-ASP.NET%20Core-CI)](https://michaelmew.visualstudio.com/SetShape/_build/latest?definitionId=9)
+[![Build Status](https://dev.azure.com/xtremekrotas/SetShape/_apis/build/status/setshape%20-%201%20-%20CI?branchName=master)](https://dev.azure.com/xtremekrotas/SetShape/_build/latest?definitionId=3&branchName=master)
