@@ -10,6 +10,10 @@
 *.userosscache
 *.sln.docstates
 
+appsettings.json
+appsettings.Production.json
+appsettings.Development.json
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -332,3 +336,6 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+SetShapeDatabase/appsettings.json
+SetShapeDatabase/appsettings.Development.json
+SetShapeDatabase/appsettings.Production.json
